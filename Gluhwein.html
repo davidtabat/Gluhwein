@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gluhwein Cost Calculator</title>
+  <style>
+    /* Add your CSS styles here */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-image: url("https://scontent.ftbs5-3.fna.fbcdn.net/v/t39.30808-6/320670717_5984481164936968_2943612831947137039_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=3635dc&_nc_ohc=K5lSIckv5GYAX8CxCE9&_nc_ht=scontent.ftbs5-3.fna&oh=00_AfCRmL9LSNA09NVvlcTw2aUr0o78vnsz-9N1RblQA7Qckg&oe=6573F28E");
+    }
+    .calculator {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 12px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <h2>გლინტვეინის თვითღირებულების მთვლელი</h2>
+    <label for="sugar">შაქრის ფასი 1 კილოგრამზე (₾ - ლარში):</label>
+    <input type="number" id="sugar" step="0.50" value="5.00">
+    <label for="fulwa">ფულვას ფასი 1 კილოგრამზე (€ - ევროში):</label>
+    <input type="number" id="fulwa" step="0.50" value="17.00">
+    <label for="juice">წვენის ფასი 1 ლიტრზე (₾ - ლარში):</label>
+    <input type="number" id="juice" step="0.50" value="2.50">
+    <label for="wine">ღვინის ფასი 1 ლიტრზე (₾ - ლარში):</label>
+    <input type="number" id="wine" step="0.50" value="5.00">
+    <label for="bottle">მინის ბოთლის ფასი ცალობით (₾ - ლარში):</label>
+    <input type="number" id="bottle" step="0.05" value="0.80">
+    <label for="korp">კორპის ფასი ცალობით (₾ - ლარში):</label>
+    <input type="number" id="korp" step="0.05" value="0.30">
+    <label for="chachi">ჩაჩის ფასი ცალობით (₾ - ლარში):</label>
+    <input type="number" id="chachi" step="0.05" value="0.70">
+    <label for="sticker">სტიკერის ფასი ცალობით (₾ - ლარში):</label>
+    <input type="number" id="sticker" step="0.01" value="0.12">
+    <label for="labeling">ეტიკეტის ფასი ცალობით (₾ - ლარში):</label>
+    <input type="number" id="labeling" step="0.05" value="0.50">
+    <label for="bottles">ბოთლების რაოდენობა:</label>
+    <input type="number" id="bottles" min="1" value="1">
+    <button onclick="calculateCost()">დათვლა</button>
+    <h3>ღირებულება ჯამში:</h3>
+    <p id="totalCost">---</p>
+  </div>
+
+  <script>
+    function calculateCost() {
+      // Fetch the exchange rate dynamically
+      const apiKey = '4a41f06ceb3f4d6d4c6328e229dd39fe';
+      const sourceCurrency = 'EUR';
+      const targetCurrency = 'GEL';
+
+      fetch(`http://apilayer.net/api/live?access_key=${apiKey}&source=${sourceCurrency}&currencies=${targetCurrency}&format=1`)
+              .then(response => response.json())
+              .then(data => {
+                const cattleToBottleRatio = 0.032;
+                const sugarVolumeToMassRatio = 1.2;
+                const fulwaVolumeToMassRatio = 1.165048544;
+
+                const sugarPrice = parseFloat(document.getElementById('sugar').value);
+                let fulwaPrice = parseFloat(document.getElementById('fulwa').value);
+                const winePrice = parseFloat(document.getElementById('wine').value);
+                const juicePrice = parseFloat(document.getElementById('juice').value);
+                const bottlePrice = parseFloat(document.getElementById('bottle').value);
+                const korpPrice = parseFloat(document.getElementById('korp').value);
+                const chachiPrice = parseFloat(document.getElementById('chachi').value);
+                const stickerPrice = parseFloat(document.getElementById('sticker').value);
+                const labelingPrice = parseFloat(document.getElementById('labeling').value);
+                const numberOfBottles = parseFloat(document.getElementById('bottles').value);
+
+                const exchangeRate = data.quotes[`${sourceCurrency}${targetCurrency}`];
+                fulwaPrice = fulwaPrice * exchangeRate;
+
+                juicePricePerBottle = juicePrice * 2 * cattleToBottleRatio;
+                fulwaPricePerBottle = fulwaPrice * ((0.180 * 3) / fulwaVolumeToMassRatio) * cattleToBottleRatio;
+                sugarPricePerBottle = sugarPrice * ((0.180 * 5) / sugarVolumeToMassRatio) * cattleToBottleRatio;
+                winePricePerBottle = winePrice * 18.56 * cattleToBottleRatio;
+
+
+                const totalCost = korpPrice + chachiPrice + stickerPrice + labelingPrice + bottlePrice + juicePricePerBottle
+                        + juicePricePerBottle + winePricePerBottle + fulwaPricePerBottle + sugarPricePerBottle;
+
+                const costPerBottle = totalCost * numberOfBottles;
+                document.getElementById('totalCost').textContent = `₾${costPerBottle.toFixed(2)}`;
+              })
+              .catch(error => {
+                console.error('Error fetching exchange rates:', error);
+              });
+    }
+  </script>
+</body>
+</html>
+

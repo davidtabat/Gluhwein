@@ -83,11 +83,8 @@
         const targetCurrency = 'GEL';
         const apiKey = 'Iz3lhEAcjKHWBvoXBdEgZxBjjI02VfRB';
 
-        fetch(`https://test-api.tbcbank.ge/v1/exchange-rates/nbg?currency=EUR`, {
-            method: 'GET',
-            headers: {
-                'apikey': apiKey
-            }
+        fetch(`https://nbg.gov.ge/gw/api/ct/monetarypolicy/currencies/en/json/?currencies=EUR`, {
+            method: 'GET'
         }).then(response => response.json())
             .then(data => {
                 const cattleToBottleRatio = 0.032;
@@ -105,7 +102,7 @@
                 const labelingPrice = parseFloat(document.getElementById('labeling').value);
                 const numberOfBottles = parseFloat(document.getElementById('bottles').value);
 
-                const exchangeRate = data[0]['value'] ;
+                const exchangeRate = data[0]['currencies'][0]['rate'];
                 fulwaPrice = fulwaPrice * exchangeRate;
 
                 juicePricePerBottle = juicePrice * 2 * cattleToBottleRatio;
